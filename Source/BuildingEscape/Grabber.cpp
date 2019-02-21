@@ -26,8 +26,37 @@ void UGrabber::BeginPlay()
 
 	UE_LOG(LogTemp, Warning, TEXT("Grabber reporting for duty!"));
 	
+	/// Look for attached Physics Handle
+	PhysicsHandle = GetOwner()->FindComponentByClass<UPhysicsHandleComponent>();
+	if (PhysicsHandle) {
+		// Handle is found
+	}
+	else {
+		// handle not found
+		UE_LOG(LogTemp, Error, TEXT("%s Missing physics handle component"), *GetOwner()->GetName());
+	}
+
+	/// Look for attached Input Handle
+	InputComponent = GetOwner()->FindComponentByClass<UInputComponent>();
+	if (InputComponent) {
+		// Handle is found
+		UE_LOG(LogTemp, Warning, TEXT("Input Component Found"));
+
+		// bind input axis
+		InputComponent->BindAction("Grab", IE_Pressed, this, &UGrabber::Grab);
+	}
+	else {
+		// handle not found
+		UE_LOG(LogTemp, Error, TEXT("%s Missing InputComponent"), *GetOwner()->GetName());
+	}
+
 }
 
+
+void UGrabber::Grab() {
+	//
+	UE_LOG(LogTemp, Warning, TEXT("Grab Pressed"));
+}
 
 // Called every frame
 void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -57,7 +86,23 @@ void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompone
 		0,
 		10.f
 	);
-	// ray-cast out to reach distance
+
+	// Set up query parameters
+	FCollisionQueryParams TraceParameters(FName(TEXT("")), false, GetOwner());
+
+	/// Line Trace AKA Ray cast
+	FHitResult Hit;
+	GetWorld()->LineTraceSingleByObjectType(
+		OUT Hit,
+		PlayerViewPointLocation,
+		LineTraceEnd,
+		FCollisionObjectQueryParams(ECollisionChannel::ECC_PhysicsBody),
+		TraceParameters
+	);
+
+	if (Hit.GetActor()) {
+		UE_LOG(LogTemp, Warning, TEXT("Grabber Hitting: %s"), *Hit.GetActor()->GetName());
+	}
 
 	//see what we hit
 
