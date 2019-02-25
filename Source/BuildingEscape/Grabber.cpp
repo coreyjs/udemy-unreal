@@ -67,6 +67,7 @@ void UGrabber::Grab() {
 	auto ActorHit = HitResult.GetActor();
 
 	// try and reach any actors with physics body set
+	if (!PhysicsHandle) { return; }
 	if (ActorHit) {
 		/// If we hit something then attach a physics handle
 	/// TODO attach physics handle
@@ -83,6 +84,7 @@ void UGrabber::Grab() {
 void UGrabber::Release() {
 	UE_LOG(LogTemp, Warning, TEXT("Grab Released"));
 	// TODO release physics handle
+	if (!PhysicsHandle) { return; }
 	PhysicsHandle->ReleaseComponent();
 }
 
@@ -122,6 +124,8 @@ void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompone
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 	auto LineTraceEnd = GetReachLineEnd();
+
+	if (!PhysicsHandle) { return;  }
 
 	// if the physics handle is attached, move the obejct we are holding each frame
 	if (PhysicsHandle->GrabbedComponent) {
